@@ -96,6 +96,11 @@ export function SocialMediaCard({ post, onClick, viewType = 'grid' }: SocialMedi
                   src={post.thumbnail}
                   alt={post.title}
                   className="w-24 h-24 object-cover rounded-lg"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                  }}
+                  loading="lazy"
                 />
               </div>
             )}
@@ -130,6 +135,11 @@ export function SocialMediaCard({ post, onClick, viewType = 'grid' }: SocialMedi
               src={post.thumbnail}
               alt={post.title}
               className="w-full h-36 object-cover rounded-lg"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+              }}
+              loading="lazy"
             />
           </div>
         )}

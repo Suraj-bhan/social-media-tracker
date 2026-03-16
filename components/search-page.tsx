@@ -11,9 +11,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { SocialMediaCard } from './social-media-card';
 import { PlatformIcon, getPlatformName } from './platform-icon';
 import { ThemeToggle } from './theme-toggle';
+import { AdvancedDateFilter, AdvancedDateFilterValue } from './advanced-date-filter';
 import { mockPosts } from '@/lib/mock-data';
 import { Platform, SocialMediaPost } from '@/types';
-import { Search, Filter, LayoutGrid, List, TrendingUp, Clock, BarChart3 } from 'lucide-react';
+import { Search, Filter, LayoutGrid, List, TrendingUp, Clock, BarChart3, X, CalendarDays } from 'lucide-react';
+import { isWithinInterval, parseISO, startOfDay, endOfDay, subDays } from 'date-fns';
 
 const platforms: Platform[] = ['twitter', 'reddit', 'youtube', 'google-news'];
 
@@ -26,6 +28,12 @@ export function SearchPage() {
   const [posts] = useState<SocialMediaPost[]>(mockPosts);
   const [sortBy, setSortBy] = useState<SortOption>('recent');
   const [viewType, setViewType] = useState<ViewType>('grid');
+  const [dateFilter, setDateFilter] = useState<AdvancedDateFilterValue>({
+    from: undefined,
+    to: undefined,
+    timeRange: 'all-day'
+  });
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   const filteredPosts = useMemo(() => {
     let filtered = posts.filter(post => {
@@ -37,7 +45,22 @@ export function SearchPage() {
       const matchesPlatform = selectedPlatforms.length === 0 ||
         selectedPlatforms.includes(post.platform);
 
-      return matchesSearch && matchesPlatform;
+      // Date filtering
+      const matchesDate = (() => {
+        if (!dateFilter.from || !dateFilter.to) return true;
+
+        try {
+          const postDate = parseISO(post.timestamp);
+          return isWithinInterval(postDate, {
+            start: dateFilter.from,
+            end: dateFilter.to,
+          });
+        } catch {
+          return true; // If date parsing fails, include the post
+        }
+      })();
+
+      return matchesSearch && matchesPlatform && matchesDate;
     });
 
     // Sort posts
@@ -59,7 +82,7 @@ export function SearchPage() {
     });
 
     return filtered;
-  }, [posts, searchQuery, selectedPlatforms, sortBy]);
+  }, [posts, searchQuery, selectedPlatforms, sortBy, dateFilter]);
 
   const togglePlatform = (platform: Platform) => {
     setSelectedPlatforms(prev =>
@@ -89,7 +112,7 @@ export function SearchPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-6 sm:px-8 py-4 max-w-7xl">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -129,9 +152,9 @@ export function SearchPage() {
               />
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-[140px] min-w-0">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -156,7 +179,12 @@ export function SearchPage() {
                 </SelectContent>
               </Select>
 
-              <Button variant="outline" size="icon">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                className={showAdvancedFilters ? 'bg-accent' : ''}
+              >
                 <Filter className="w-4 h-4" />
               </Button>
             </div>
@@ -186,10 +214,160 @@ export function SearchPage() {
               </Badge>
             )}
           </div>
+
+          {/* Advanced Filters */}
+          {showAdvancedFilters && (
+            <div className="mt-4 p-4 border rounded-lg bg-card shadow-sm max-w-full overflow-hidden">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
+                <h3 className="text-lg font-semibold">Advanced Filters</h3>
+                <Badge variant="secondary">
+                  {filteredPosts.length} results
+                </Badge>
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="lg:col-span-2">
+                  <label className="text-sm font-medium mb-2 block">Date & Time Filter</label>
+                  <AdvancedDateFilter
+                    value={dateFilter}
+                    onChange={setDateFilter}
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium">Quick Actions</label>
+                  <div className="flex flex-col sm:flex-row lg:flex-col gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setDateFilter({
+                          from: undefined,
+                          to: undefined,
+                          timeRange: 'all-day'
+                        });
+                        setSelectedPlatforms(platforms);
+                        setSearchQuery('BrightChamps');
+                      }}
+                    >
+                      <X className="w-4 h-4 mr-1" />
+                      Clear All
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowAdvancedFilters(false)}
+                    >
+                      Hide Filters
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Active Filters Summary */}
+              {(dateFilter.from || dateFilter.to) && (
+                <div className="mt-3 pt-3 border-t">
+                  <div className="flex flex-wrap gap-2 items-center">
+                    <span className="text-sm font-medium text-muted-foreground">Active Filters:</span>
+                    {dateFilter.preset && (
+                      <Badge variant="secondary" className="gap-1">
+                        <Clock className="w-3 h-3" />
+                        {dateFilter.preset === 'today' && 'Today'}
+                        {dateFilter.preset === 'week' && 'Last 7 days'}
+                        {dateFilter.preset === 'month' && 'Last 30 days'}
+                        {dateFilter.preset === '3months' && 'Last 3 months'}
+                        <X
+                          className="w-3 h-3 cursor-pointer hover:bg-muted-foreground/20 rounded"
+                          onClick={() => setDateFilter({
+                            from: undefined,
+                            to: undefined,
+                            timeRange: 'all-day'
+                          })}
+                        />
+                      </Badge>
+                    )}
+                    {!dateFilter.preset && dateFilter.from && (
+                      <Badge variant="secondary" className="gap-1">
+                        <Clock className="w-3 h-3" />
+                        Custom Date Range
+                        <X
+                          className="w-3 h-3 cursor-pointer hover:bg-muted-foreground/20 rounded"
+                          onClick={() => setDateFilter({
+                            from: undefined,
+                            to: undefined,
+                            timeRange: 'all-day'
+                          })}
+                        />
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-6 sm:px-8 py-6 max-w-7xl overflow-hidden">
+        {/* Quick Date Filters */}
+        <div className="flex flex-wrap gap-2 mb-4 items-center">
+          <span className="text-sm font-medium text-muted-foreground mr-2">Quick filters:</span>
+          <Button
+            variant={dateFilter.preset === 'today' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setDateFilter({
+              from: startOfDay(new Date()),
+              to: endOfDay(new Date()),
+              preset: 'today',
+              timeRange: 'all-day'
+            })}
+          >
+            Today
+          </Button>
+          <Button
+            variant={dateFilter.preset === 'week' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => {
+              setDateFilter({
+                from: startOfDay(subDays(new Date(), 6)),
+                to: endOfDay(new Date()),
+                preset: 'week',
+                timeRange: 'all-day'
+              });
+            }}
+          >
+            This Week
+          </Button>
+          <Button
+            variant={dateFilter.preset === 'month' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => {
+              setDateFilter({
+                from: startOfDay(subDays(new Date(), 29)),
+                to: endOfDay(new Date()),
+                preset: 'month',
+                timeRange: 'all-day'
+              });
+            }}
+          >
+            This Month
+          </Button>
+          {(dateFilter.from || dateFilter.to) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setDateFilter({
+                from: undefined,
+                to: undefined,
+                timeRange: 'all-day'
+              })}
+            >
+              <X className="w-4 h-4 mr-1" />
+              Clear
+            </Button>
+          )}
+        </div>
+
         <Tabs defaultValue="posts" className="w-full">
           <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
             <TabsTrigger value="posts">Posts ({filteredPosts.length})</TabsTrigger>
@@ -199,9 +377,25 @@ export function SearchPage() {
           <TabsContent value="posts" className="mt-6">
             {/* Results Summary */}
             <div className="flex items-center justify-between mb-6">
-              <p className="text-sm text-muted-foreground">
-                Showing {filteredPosts.length} results for <span className="font-medium">"{searchQuery}"</span>
-              </p>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                <p className="text-sm text-muted-foreground">
+                  Showing {filteredPosts.length} results for <span className="font-medium">"{searchQuery}"</span>
+                </p>
+                {(dateFilter.from || selectedPlatforms.length < platforms.length) && (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>•</span>
+                    <span>
+                      {dateFilter.preset && `${
+                        dateFilter.preset === 'today' ? 'Today' :
+                        dateFilter.preset === 'week' ? 'Last 7 days' :
+                        dateFilter.preset === 'month' ? 'Last 30 days' :
+                        dateFilter.preset === '3months' ? 'Last 3 months' : 'Custom range'
+                      }`}
+                      {selectedPlatforms.length < platforms.length && ` • ${selectedPlatforms.length} platform${selectedPlatforms.length > 1 ? 's' : ''}`}
+                    </span>
+                  </div>
+                )}
+              </div>
               <div className="text-xs text-muted-foreground">
                 Sorted by {sortBy}
               </div>
@@ -210,7 +404,7 @@ export function SearchPage() {
             {/* Posts Grid/List */}
             <div className={
               viewType === 'grid'
-                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"
                 : "space-y-4"
             }>
               {filteredPosts.map((post) => (
