@@ -15,7 +15,25 @@ export const mockPosts: SocialMediaPost[] = [
       shares: 23,
       comments: 18
     },
-    url: 'https://twitter.com/example/status/1'
+    url: 'https://twitter.com/example/status/1',
+    aiAnalytics: {
+      status: 'completed',
+      mood: 'positive',
+      sentimentScore: 0.8,
+      confidence: 0.92,
+      keywords: ['amazing', 'revolutionizing', 'enrolled', 'curriculum', 'teachers'],
+      emotions: {
+        joy: 0.7,
+        anger: 0.0,
+        fear: 0.0,
+        sadness: 0.0,
+        surprise: 0.2,
+        trust: 0.6
+      },
+      topics: ['education', 'coding', 'children', 'learning'],
+      toxicity: 0.02,
+      spam: 0.05
+    }
   },
   {
     id: '2',
@@ -30,7 +48,25 @@ export const mockPosts: SocialMediaPost[] = [
       shares: 156,
       comments: 67
     },
-    url: 'https://twitter.com/example/status/2'
+    url: 'https://twitter.com/example/status/2',
+    aiAnalytics: {
+      status: 'in-progress',
+      mood: 'positive',
+      sentimentScore: 0.6,
+      confidence: 0.78,
+      keywords: ['proud', 'raises', 'expand', 'scaling', 'internationally'],
+      emotions: {
+        joy: 0.5,
+        anger: 0.0,
+        fear: 0.0,
+        sadness: 0.0,
+        surprise: 0.3,
+        trust: 0.4
+      },
+      topics: ['funding', 'startup', 'expansion', 'business'],
+      toxicity: 0.01,
+      spam: 0.03
+    }
   },
 
   // Reddit Posts
@@ -46,6 +82,7 @@ export const mockPosts: SocialMediaPost[] = [
       likes: 23
     },
     url: 'https://reddit.com/r/parenting/example1'
+    // No AI analytics - not checked yet
   },
   {
     id: '4',
@@ -58,7 +95,25 @@ export const mockPosts: SocialMediaPost[] = [
       comments: 78,
       likes: 156
     },
-    url: 'https://reddit.com/r/learnprogramming/example2'
+    url: 'https://reddit.com/r/learnprogramming/example2',
+    aiAnalytics: {
+      status: 'completed',
+      mood: 'mixed',
+      sentimentScore: 0.1,
+      confidence: 0.85,
+      keywords: ['comparison', 'experience', 'detailed', 'twins', 'trying'],
+      emotions: {
+        joy: 0.2,
+        anger: 0.1,
+        fear: 0.1,
+        sadness: 0.0,
+        surprise: 0.1,
+        trust: 0.4
+      },
+      topics: ['comparison', 'education', 'platforms', 'review'],
+      toxicity: 0.08,
+      spam: 0.02
+    }
   },
 
   // YouTube Posts
@@ -76,7 +131,25 @@ export const mockPosts: SocialMediaPost[] = [
       comments: 67
     },
     url: 'https://youtube.com/watch?v=example1',
-    thumbnail: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=320&h=180&fit=crop&crop=center'
+    thumbnail: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=320&h=180&fit=crop&crop=center',
+    aiAnalytics: {
+      status: 'completed',
+      mood: 'negative',
+      sentimentScore: -0.3,
+      confidence: 0.87,
+      keywords: ['honest', 'opinion', 'investment', 'worth', 'review'],
+      emotions: {
+        joy: 0.1,
+        anger: 0.2,
+        fear: 0.1,
+        sadness: 0.3,
+        surprise: 0.0,
+        trust: 0.3
+      },
+      topics: ['review', 'investment', 'education', 'analysis'],
+      toxicity: 0.15,
+      spam: 0.08
+    }
   },
   {
     id: '6',
@@ -92,7 +165,25 @@ export const mockPosts: SocialMediaPost[] = [
       comments: 89
     },
     url: 'https://youtube.com/watch?v=example2',
-    thumbnail: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=320&h=180&fit=crop&crop=center'
+    thumbnail: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=320&h=180&fit=crop&crop=center',
+    aiAnalytics: {
+      status: 'in-progress',
+      mood: 'positive',
+      sentimentScore: 0.7,
+      confidence: 0.65, // Lower confidence since in-progress
+      keywords: ['proud', 'amazing', 'built', 'game', 'showcase'],
+      emotions: {
+        joy: 0.8,
+        anger: 0.0,
+        fear: 0.0,
+        sadness: 0.0,
+        surprise: 0.1,
+        trust: 0.6
+      },
+      topics: ['achievement', 'gaming', 'education', 'pride'],
+      toxicity: 0.02,
+      spam: 0.01
+    }
   },
 
   {
@@ -109,7 +200,25 @@ export const mockPosts: SocialMediaPost[] = [
       comments: 45
     },
     url: 'https://youtube.com/watch?v=example3',
-    thumbnail: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=320&h=180&fit=crop&crop=center'
+    thumbnail: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=320&h=180&fit=crop&crop=center',
+    aiAnalytics: {
+      status: 'completed',
+      mood: 'neutral',
+      sentimentScore: 0.05,
+      confidence: 0.91,
+      keywords: ['progress', 'bootcamp', '8-year-old', 'learned', 'week'],
+      emotions: {
+        joy: 0.3,
+        anger: 0.0,
+        fear: 0.0,
+        sadness: 0.0,
+        surprise: 0.1,
+        trust: 0.4
+      },
+      topics: ['education', 'progress', 'bootcamp', 'learning'],
+      toxicity: 0.01,
+      spam: 0.02
+    }
   },
 
   // Google News Posts

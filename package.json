@@ -1,6 +1,7 @@
 {
   "name": "social-media-app",
   "version": "0.1.0",
+  "description": "An advanced social media analytics platform that aggregates and analyzes posts from multiple platforms (Twitter/X, Reddit, YouTube, Google News) with AI-powered sentiment analysis, mood detection, emotion analysis, and sophisticated filtering capabilities. Features include real-time AI content analysis, multi-dimensional mood tracking, advanced date filtering, platform-specific analytics, and comprehensive post insights with safety and toxicity detection.",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,8 +11,10 @@
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.11",
+    "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-popover": "^1.1.15",
+    "@radix-ui/react-progress": "^1.1.8",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",

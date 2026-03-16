@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Social Media Tracker - BrightChamps",
-  description: "Monitor brand mentions and engagement across multiple social media platforms including Twitter/X, Reddit, YouTube, and Google News.",
+  title: "Social Media Analytics Platform - Advanced AI-Powered Insights",
+  description: "Advanced social media analytics platform with AI-powered sentiment analysis, mood detection, and emotion mapping. Monitor brand mentions across Twitter/X, Reddit, YouTube, and Google News with real-time content analysis, safety detection, and comprehensive filtering capabilities.",
 };
 
 export default function RootLayout({

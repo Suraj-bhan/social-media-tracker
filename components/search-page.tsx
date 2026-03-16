@@ -12,6 +12,7 @@ import { SocialMediaCard } from './social-media-card';
 import { PlatformIcon, getPlatformName } from './platform-icon';
 import { ThemeToggle } from './theme-toggle';
 import { AdvancedDateFilter, AdvancedDateFilterValue } from './advanced-date-filter';
+import { PostAnalyticsModal } from './post-analytics-modal';
 import { mockPosts } from '@/lib/mock-data';
 import { Platform, SocialMediaPost } from '@/types';
 import { Search, Filter, LayoutGrid, List, TrendingUp, Clock, BarChart3, X, CalendarDays } from 'lucide-react';
@@ -34,6 +35,8 @@ export function SearchPage() {
     timeRange: 'all-day'
   });
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<SocialMediaPost | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const filteredPosts = useMemo(() => {
     let filtered = posts.filter(post => {
@@ -93,8 +96,8 @@ export function SearchPage() {
   };
 
   const handleCardClick = (post: SocialMediaPost) => {
-    // TODO: Handle card click behavior - will be implemented later
-    console.log('Card clicked:', post);
+    setSelectedPost(post);
+    setIsModalOpen(true);
   };
 
   const platformStats = useMemo(() => {
@@ -455,6 +458,13 @@ export function SearchPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Post Analytics Modal */}
+      <PostAnalyticsModal
+        post={selectedPost}
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+      />
     </div>
   );
 }

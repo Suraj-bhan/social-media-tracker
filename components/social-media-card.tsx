@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { PlatformIcon, getPlatformName } from './platform-icon';
+import { AIAnalyticsIndicator } from './ai-analytics-indicator';
 import { Heart, MessageCircle, Share2, Eye, Clock, ExternalLink } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from '@/components/ui/button';
@@ -55,6 +56,11 @@ export function SocialMediaCard({ post, onClick, viewType = 'grid' }: SocialMedi
               <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
                 {post.content}
               </p>
+
+              {/* AI Analytics for List View */}
+              <div className="mb-4">
+                <AIAnalyticsIndicator analytics={post.aiAnalytics} compact />
+              </div>
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4 text-xs text-muted-foreground">
@@ -147,6 +153,11 @@ export function SocialMediaCard({ post, onClick, viewType = 'grid' }: SocialMedi
         <p className="text-sm text-muted-foreground line-clamp-3 mb-4 leading-relaxed">
           {post.content}
         </p>
+
+        {/* AI Analytics for Grid View */}
+        <div className="mb-4">
+          <AIAnalyticsIndicator analytics={post.aiAnalytics} compact />
+        </div>
 
         <Separator className="mb-4" />
 
