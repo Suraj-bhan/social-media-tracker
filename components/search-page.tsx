@@ -1,0 +1,266 @@
+'use client';
+
+import { useState, useMemo } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { SocialMediaCard } from './social-media-card';
+import { PlatformIcon, getPlatformName } from './platform-icon';
+import { ThemeToggle } from './theme-toggle';
+import { mockPosts } from '@/lib/mock-data';
+import { Platform, SocialMediaPost } from '@/types';
+import { Search, Filter, LayoutGrid, List, TrendingUp, Clock, BarChart3 } from 'lucide-react';
+
+const platforms: Platform[] = ['twitter', 'reddit', 'youtube', 'google-news'];
+
+type SortOption = 'recent' | 'popular' | 'engagement';
+type ViewType = 'grid' | 'list';
+
+export function SearchPage() {
+  const [searchQuery, setSearchQuery] = useState('BrightChamps');
+  const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>(platforms);
+  const [posts] = useState<SocialMediaPost[]>(mockPosts);
+  const [sortBy, setSortBy] = useState<SortOption>('recent');
+  const [viewType, setViewType] = useState<ViewType>('grid');
+
+  const filteredPosts = useMemo(() => {
+    let filtered = posts.filter(post => {
+      const matchesSearch = searchQuery === '' ||
+        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post.author.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesPlatform = selectedPlatforms.length === 0 ||
+        selectedPlatforms.includes(post.platform);
+
+      return matchesSearch && matchesPlatform;
+    });
+
+    // Sort posts
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'recent':
+          return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+        case 'popular':
+          const aTotal = (a.engagement.likes || 0) + (a.engagement.shares || 0);
+          const bTotal = (b.engagement.likes || 0) + (b.engagement.shares || 0);
+          return bTotal - aTotal;
+        case 'engagement':
+          const aEng = (a.engagement.comments || 0);
+          const bEng = (b.engagement.comments || 0);
+          return bEng - aEng;
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [posts, searchQuery, selectedPlatforms, sortBy]);
+
+  const togglePlatform = (platform: Platform) => {
+    setSelectedPlatforms(prev =>
+      prev.includes(platform)
+        ? prev.filter(p => p !== platform)
+        : [...prev, platform]
+    );
+  };
+
+  const handleCardClick = (post: SocialMediaPost) => {
+    // TODO: Handle card click behavior - will be implemented later
+    console.log('Card clicked:', post);
+  };
+
+  const platformStats = useMemo(() => {
+    return platforms.map(platform => {
+      const count = filteredPosts.filter(post => post.platform === platform).length;
+      const totalEngagement = filteredPosts
+        .filter(post => post.platform === platform)
+        .reduce((sum, post) => {
+          return sum + (post.engagement.likes || 0) + (post.engagement.comments || 0) + (post.engagement.shares || 0);
+        }, 0);
+      return { platform, count, totalEngagement };
+    });
+  }, [filteredPosts]);
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Social Media Tracker</h1>
+              <p className="text-sm text-muted-foreground">
+                Monitor brand mentions and engagement across platforms
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <Button
+                variant={viewType === 'grid' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewType('grid')}
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </Button>
+              <Button
+                variant={viewType === 'list' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewType('list')}
+              >
+                <List className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Search and Filters */}
+          <div className="flex flex-col md:flex-row gap-4 mb-4">
+            <div className="relative flex-1">
+              <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search mentions, keywords, or topics..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 h-10"
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recent">
+                    <div className="flex items-center">
+                      <Clock className="w-4 h-4 mr-2" />
+                      Recent
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="popular">
+                    <div className="flex items-center">
+                      <TrendingUp className="w-4 h-4 mr-2" />
+                      Popular
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="engagement">
+                    <div className="flex items-center">
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      Engagement
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button variant="outline" size="icon">
+                <Filter className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Platform Filters */}
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-sm font-medium text-muted-foreground mr-2">Platforms:</span>
+            {platforms.map((platform) => (
+              <Badge
+                key={platform}
+                variant={selectedPlatforms.includes(platform) ? 'default' : 'outline'}
+                className="cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => togglePlatform(platform)}
+              >
+                <PlatformIcon platform={platform} size={14} />
+                <span className="ml-1">{getPlatformName(platform)}</span>
+              </Badge>
+            ))}
+            {selectedPlatforms.length < platforms.length && (
+              <Badge
+                variant="secondary"
+                className="cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => setSelectedPlatforms(platforms)}
+              >
+                Select All
+              </Badge>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-6">
+        <Tabs defaultValue="posts" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
+            <TabsTrigger value="posts">Posts ({filteredPosts.length})</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="posts" className="mt-6">
+            {/* Results Summary */}
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-sm text-muted-foreground">
+                Showing {filteredPosts.length} results for <span className="font-medium">"{searchQuery}"</span>
+              </p>
+              <div className="text-xs text-muted-foreground">
+                Sorted by {sortBy}
+              </div>
+            </div>
+
+            {/* Posts Grid/List */}
+            <div className={
+              viewType === 'grid'
+                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                : "space-y-4"
+            }>
+              {filteredPosts.map((post) => (
+                <SocialMediaCard
+                  key={post.id}
+                  post={post}
+                  onClick={() => handleCardClick(post)}
+                  viewType={viewType}
+                />
+              ))}
+            </div>
+
+            {/* Empty State */}
+            {filteredPosts.length === 0 && (
+              <Card className="mt-8">
+                <CardContent className="flex flex-col items-center justify-center py-16">
+                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                    <Search className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <CardTitle className="text-xl mb-2">No posts found</CardTitle>
+                  <CardDescription className="text-center max-w-sm">
+                    Try adjusting your search query or platform filters to find more content.
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="analytics" className="mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {platformStats.map((stat) => (
+                <Card key={stat.platform}>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      {getPlatformName(stat.platform)}
+                    </CardTitle>
+                    <PlatformIcon platform={stat.platform} size={16} />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stat.count}</div>
+                    <p className="text-xs text-muted-foreground">
+                      {stat.totalEngagement} total interactions
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}
